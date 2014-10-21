@@ -1,0 +1,380 @@
+<html>
+    <head>
+       
+       <link rel="icon" href="data:image/gif;base64,R0lGODlhJAAkALMAAP//////AOjo6L+/v5OTKH9/f39/ACgoKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAQUAP8ALAAAAAAkACQAAATEEMhJq7046827/xQhgiARBMBBduaJHsKqtS4ixLJFu4ON55NdrfADCnk+oOQ4LK6YyJsRiUAMmrlddRt1erRbhCuAID7H5PC4Jy2hw+Jx2TtDp7nr5Ndu2Brsc3t2PVVXaGx0OnYneIBmG1ABfX+LiJCLJz2Gi4EZkYyYmXoXn6Fyj4qmhJuDoyGmd3GYna+waqGWtaqFtqhLsMCnbb/BwD0FvgClwcfIXgQHB3DT1GHIRIk319vc3dzDFzfi4+Tl5EokEQA7">
+        <style>
+            
+            option:nth-child(1){
+                background-color: green;
+                color:#FFF;
+            }
+            option:nth-child(2){
+                background-color: orange;
+                color:#FFF;
+            }
+            option:nth-child(3){
+                background-color: red;
+                color:#FFF;
+            }
+            
+            option:nth-child(1):focus{
+                background: white;
+                color:lime;
+            }
+            
+            form
+            {
+                display: flex;
+                position: relative;
+            }
+            
+            fieldset{
+                padding:15px;
+                border: 1px solid #555555;
+                display: inline-block;
+                margin: auto;
+            }
+            
+            legend {
+                margin:auto;
+
+            }
+            #addremove,#convert,#saveclear,#ETA,#controls>fieldset>legend{
+                margin:0;
+                text-align: left;
+                width:auto;
+                display: inline-block;
+            }
+            input.issue{
+                width: 200px;
+            }
+            
+            input.comment{
+                width: 300px;
+            }
+            input[type="checkbox"]{
+                width: 100%;
+                margin: auto;
+            }
+            #ETA>input{
+                text-align: center;               
+            }
+            table{
+                margin:auto;
+            }
+        
+            tr:nth-child(odd){
+                background-color: beige;
+            }
+            thead>tr{
+                background-color: blue !important;
+                color: white;
+                border: 6px solid black !important;
+            }
+            thead>tr>th{
+                border: 2px solid black;
+            }
+            tr{
+                padding: 5px;
+            }
+            tr>td>input{
+                margin: 2px;
+            }
+            
+            #controls{
+                margin: auto;
+                display: block;
+                position: relative;
+                text-align: center;
+            }
+            #results
+            {
+                width:50%;
+                display: block;
+                height: 400px;
+                position: relative;
+                resize: none;
+                overflow-x: scroll;
+                margin: 25px auto 25px auto;
+            }
+            p{
+                margin: auto;
+                text-align: center;
+            }
+            #buttonCompile{
+                border: 2px solid black;
+                border-radius: 5px;
+            }
+            #buttonCreate{
+                border: 2px solid green;
+                border-radius: 5px;
+            }
+            #buttonDelete{
+                border: 2px solid red;
+                border-radius: 5px;
+            }
+            #buttonSave{
+                border: 2px solid blue;
+                border-radius: 5px;
+            }            
+            #buttonClear{
+                border: 2px solid red;
+                border-radius: 5px;
+            }               
+            input:focus {
+                border: 3px solid lime;    
+            }
+            
+        </style>
+        
+        <script>
+        //CREATED BY EAMON BUCKLEY 10/21/14
+        //FOR ADDING NEW LINES
+            function appendRow(){
+                var items = new Array();
+                function rowData(checkbox,status,issues,comments){
+                    this.checkbox = checkbox;
+                    this.status = status;
+                    this.issues = issues;
+                    this.comments = comments;
+                }
+                var rows = document.getElementById("JList").getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+                var colData = "";
+                //Backing up . . .
+                for (var i = 0 ; i < rows.length ; i++ ){
+                    colData = rows[i].getElementsByTagName("td");
+                    items[i] = new rowData(
+                    colData[0].getElementsByTagName("input")[0].checked,
+                    colData[1].getElementsByTagName("select")[0].value,
+                    colData[2].getElementsByTagName("input")[0].value,
+                    colData[3].getElementsByTagName("input")[0].value
+                    );
+                }
+                //Backup saved.
+                var newRow = document.getElementById("JList").getElementsByTagName("tbody")[0].innerHTML;
+                newRow+="<td><input type=\"checkbox\" class=\"flag\"/></td><td><select><option>OK</option><option>WAIT</option><option>PROBLEM</option></select></td><td><input type=\"text\" class=\"issue\" placeholder=\"Issue...\"/></td><td><input type=\"text\" class=\"comment\" placeholder=\"Explanations/Comments etc.\"/></td>";
+                document.getElementById("JList").getElementsByTagName("tbody")[0].innerHTML = newRow;
+                for (i = 0 ; i < rows.length - 1; i++){
+                    colData = rows[i].getElementsByTagName("td");
+                    colData[0].getElementsByTagName("input")[0].checked = items[i]["checkbox"];
+                    colData[1].getElementsByTagName("select")[0].value = items[i]["status"];
+                    colData[2].getElementsByTagName("input")[0].value = items[i]["issues"];
+                    colData[3].getElementsByTagName("input")[0].value = items[i]["comments"];
+                }
+                
+                
+            }
+        //FOR DELETING LINES WITH CHECKBOX MARKED
+            function deleteRows(){
+                var rows = document.getElementsByClassName("flag");
+                
+                for (var i = rows.length - 1 ; i > 0 ; i--){
+                    if (rows[i].checked){
+                        rows[i].parentNode.parentNode.outerHTML = "";
+                    }
+                }
+                
+            }
+        //TAKES LIST AND WRITES IT TO TEXTAREA
+            function compileList(){
+                var items = new Array();
+                function rowData(checkbox,status,issues,comments){
+                    this.checkbox = checkbox;
+                    this.status = status;
+                    this.issues = issues;
+                    this.comments = comments;
+                }
+                var rows = document.getElementById("JList").getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+                var colData = "";
+                //Backing up . . .
+                for (var i = 0 ; i < rows.length ; i++ ){
+                    colData = rows[i].getElementsByTagName("td");
+                    items[i] = new rowData(
+                    colData[0].getElementsByTagName("input")[0].checked,
+                    colData[1].getElementsByTagName("select")[0].value,
+                    colData[2].getElementsByTagName("input")[0].value,
+                    colData[3].getElementsByTagName("input")[0].value
+                    );
+                }
+                
+                var textArea = document.getElementById("results");
+                
+                textArea.value = "{panel:title=Status Update . . .|titleColor=white|borderColor=#0099FF|titleBGColor=#0066FF|bgColor=#FFFFCE|}\n";
+                textArea.value += "\nBelow is a simplified view of the personal tasks I have created and is updated each time a step is completed.\n\n";
+                textArea.value += "||(i)||Status||Issue||Comments||";
+                
+                for (var i = 0; i < items.length;i++){
+                    if (items[i].status == "OK"){
+                        textArea.value += "\n||(/)||{color:green}OK{color}|";
+                    }
+                    if (items[i].status == "WAIT"){
+                        textArea.value += "\n||(!)||{color:orange}WAIT{color}|";
+                    }
+                    if (items[i].status == "PROBLEM"){
+                        textArea.value += "\n||(x)||{color:red}PROBLEM{color}|";
+                    }
+                    
+                    
+                    if (items[i].issues != ""){
+                        textArea.value += items[i].issues+"|";
+                    }
+                    else textArea.value += "N/A|"
+                    
+                    if (items[i].comments != ""){
+                    textArea.value += items[i].comments+"|";
+                    }
+                    else textArea.value += "N/A|"
+                }
+                
+
+                
+                
+                textArea.value += "\nh3.Estimated Time to Completion: {color:blue}"+ document.getElementById("ETA").value +"{color}";
+                
+                textArea.value += "\n{panel}";                
+                
+            }
+            //REMEMBERS SAVED LIST (IF THERE IS ONE) AND FOCUSES ON LAST LIST ITEM
+            function listLoad(rowStorage){
+                if (!rowStorage){
+                    document.getElementById("JList").getElementsByTagName("tbody")[0].getElementsByTagName("tr")[0].getElementsByTagName("td")[2].getElementsByTagName("input")[0].focus();
+                    return;
+                }
+                var colData = "";
+                var rowStorage = JSON.parse(rowStorage);
+                
+                for (i = 0 ; i < rowStorage.length-1 ; i++){
+                    appendRow();
+                }
+                var rows = document.getElementById("JList").getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+                
+                for (i = 0 ; i < rows.length ; i++){
+                    colData = rows[i].getElementsByTagName("td");
+                    colData[0].getElementsByTagName("input")[0].checked = rowStorage[i]["checkbox"];
+                    colData[1].getElementsByTagName("select")[0].value = rowStorage[i]["status"];
+                    colData[2].getElementsByTagName("input")[0].value = rowStorage[i]["issues"];
+                    colData[3].getElementsByTagName("input")[0].value = rowStorage[i]["comments"];
+                }                
+                colData[2].getElementsByTagName("input")[0].focus();
+                
+            }
+            //SAVES CURRENT LIST INTO LOCALSTORAGE FOR LATER RETRIEVAL
+            function listSave(){
+                var items = new Array();
+                function rowData(checkbox,status,issues,comments){
+                    this.checkbox = checkbox;
+                    this.status = status;
+                    this.issues = issues;
+                    this.comments = comments;
+                }
+                var rows = document.getElementById("JList").getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+                var colData = "";
+                //Backing up . . .
+                for (var i = 0 ; i < rows.length ; i++ ){
+                    colData = rows[i].getElementsByTagName("td");
+                    items[i] = new rowData(
+                    colData[0].getElementsByTagName("input")[0].checked,
+                    colData[1].getElementsByTagName("select")[0].value,
+                    colData[2].getElementsByTagName("input")[0].value,
+                    colData[3].getElementsByTagName("input")[0].value
+                    );
+                }
+                localStorage.setItem("rowStorage",JSON.stringify(items));
+            }
+            //NUKE EVERYTHING AND REFRESH
+            function listClean(){
+                if (!confirm("Are you sure?")){
+                    return;
+                    }
+                localStorage.removeItem("rowStorage");
+                location.reload();
+                
+            }
+            
+            
+            
+            
+            
+            
+        </script>
+        <title>JIRA COMMENT CREATOR</title>
+    </head>
+    <body onload="listLoad(localStorage.rowStorage)" >
+        <form>
+            <fieldset>
+               <legend align="center"> < JIRA COMMENT CREATOR > </legend>
+               <table id="JList">
+                <thead>
+                 <tr>
+                    <th>DEL</th>
+                    <th>STATUS</th>
+                    <th>ISSUE</th>
+                    <th>COMMENTS</th>
+                 </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                   <td>
+                       <input type="checkbox" class="flag"/>
+                   </td>
+                   <td>
+                       <select>
+                           <option>OK</option>
+                           <option>WAIT</option>
+                           <option>PROBLEM</option>
+                       </select>
+                   </td>
+                   <td>
+                       <input type="text" class="issue" placeholder="Issue..."/>
+                   </td>
+                   <td>
+                       <input type="text" class="comment" placeholder="Explanations/Comments etc."/>
+                   </td>
+                  </tr>
+                </tbody>                    
+               </table>
+               <br />
+               <div id="controls">
+                   <fieldset id="addremove">
+                      <legend>ADD/REMOVE ITEMS</legend>
+                      <input id="buttonCreate" type="button" value=" ADD NEW... " onClick="appendRow()"/>
+                      <input id="buttonDelete" type="button" value=" DELETE " onClick="deleteRows()"/>
+                   </fieldset>
+                   <fieldset id="convert">
+                        <legend>CONVERT</legend>
+                        <input id="buttonCompile" type="button" value=" COMPILE " onClick="compileList()"/>
+                   </fieldset>
+                   <fieldset id="saveclear">
+                       <legend>SAVE/CLEAR ALL ITEMS</legend>
+                       <input id="buttonSave" type="button" value=" SAVE " onClick="listSave()"/>
+                       <input id="buttonClear" type="button" value=" CLEAR... " onClick="listClean()"/>
+                   </fieldset>
+                   <fieldset>
+                       <legend>ESTIMATED TIME LEFT</legend>
+                       <input id="ETA" type="text" value=" 1 DAY " placeholder="Estimated Time"/>
+                   </fieldset>
+               </div>
+               <br />
+               <br />
+               <textarea id="results" rows="4" cols="50" placeholder="Copy & Paste this into JIRA Comments section" readonly ></textarea>
+               <p>
+                   The purpose of this tool is to rapidly create eye-appealing graphical representation of progress made on a task.
+                   <ol>Instructions:
+                       <li>Make desired list. Click SAVE it if you want to work on it after closing tab/window.</li>
+                       <li>Specify the Estimated time left, Default: "1 DAY"</li>
+                       <li>Click COMPILE to convert into the desired code.</li>
+                       <li>Copy & Paste into JIRA Comments section</li>
+                       <li>Click on <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAPElEQVR42mP4//8/AyWYgWIDHjx48L+goIAsDNLLAGLYlm8hC4P0DkIDkMHAuwAbGAkuoL8BFOcFSnMjAF48oX6YfwDmAAAAAElFTkSuQmCC" /> to see a preview.</li>
+                       <ul><li>Click on the (?) button for further reference.</li></ul>
+                       <li>Make any changes needed and add the comment to the page.</li>
+                       <li>Done!</li>
+                   </ol>
+               </p>
+            </fieldset>
+        </form>
+        
+        
+        
+        
+    </body>
+</html>
